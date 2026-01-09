@@ -20,35 +20,38 @@
             display: flex;
             flex-direction: column;
             align-items: center;
+            justify-content: space-between; /* Distribute content vertically */
+            padding: 20px 0;
         }
 
         #tree {
             position: relative;
-            width: 360px;
-            height: 380px;
+            width: 85vw; /* Responsive width */
+            max-width: 360px;
+            aspect-ratio: 1 / 1; /* Keep it circular */
             background: #2D5A27;
             border-radius: 50% 50% 45% 45%;
-            margin-top: 30px;
-            box-shadow: inset -20px -20px 50px rgba(0,0,0,0.2);
+            box-shadow: inset -15px -15px 40px rgba(0,0,0,0.2);
             z-index: 1;
+            margin: auto 0; /* Center tree in available space */
         }
 
         #tree::after {
             content: '';
             position: absolute;
-            bottom: -60px;
+            bottom: -40px;
             left: 50%;
             transform: translateX(-50%);
-            width: 60px;
-            height: 80px;
+            width: 40px;
+            height: 50px;
             background: #5D4037;
             z-index: -1;
         }
 
         .apple {
             position: absolute;
-            width: 70px;
-            height: 70px;
+            width: 60px;
+            height: 60px;
             cursor: grab;
             user-select: none;
             z-index: 10;
@@ -65,15 +68,15 @@
             height: 100%;
             background: #FF4444;
             border-radius: 50% 50% 45% 45%;
-            box-shadow: inset -5px -5px 10px rgba(0,0,0,0.2);
+            box-shadow: inset -4px -4px 8px rgba(0,0,0,0.2);
         }
 
         .apple-leaf {
             position: absolute;
-            top: -5px;
+            top: -4px;
             left: 50%;
-            width: 15px;
-            height: 20px;
+            width: 12px;
+            height: 16px;
             background: #4CAF50;
             border-radius: 0 100% 0 100%;
             transform: translateX(-50%) rotate(-15deg);
@@ -84,10 +87,10 @@
             z-index: 11;
             color: white;
             font-weight: bold;
-            font-size: 13px;
+            font-size: 11px;
             text-align: center;
-            padding: 5px;
-            line-height: 1.2;
+            padding: 4px;
+            line-height: 1.1;
             pointer-events: none;
             text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
             opacity: 0;
@@ -98,32 +101,32 @@
             opacity: 1;
         }
 
+        .basket-container {
+            width: 100%;
+            display: flex;
+            justify-content: space-around;
+            padding: 0 10px 10px 10px;
+            z-index: 5;
+        }
+
         .basket {
-            width: 145px;
-            height: 110px;
+            width: 42vw;
+            max-width: 150px;
+            height: 90px;
             border-radius: 10px 10px 45% 45%;
-            position: absolute;
-            bottom: 30px;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: flex-end;
-            padding-bottom: 15px;
+            padding-bottom: 12px;
             color: white;
             font-weight: 800;
             box-shadow: 0 8px 15px rgba(0,0,0,0.2);
-            border: 4px solid rgba(255,255,255,0.3);
+            border: 3px solid rgba(255,255,255,0.3);
         }
 
-        #good-basket {
-            left: 15px;
-            background: #43A047;
-        }
-
-        #bad-basket {
-            right: 15px;
-            background: #E53935;
-        }
+        #good-basket { background: #43A047; }
+        #bad-basket { background: #E53935; }
 
         .dragging {
             z-index: 100;
@@ -137,18 +140,19 @@
             left: 50%;
             transform: translate(-50%, -50%);
             background: white;
-            padding: 30px 50px;
+            padding: 30px;
             border-radius: 30px;
             box-shadow: 0 15px 40px rgba(0,0,0,0.3);
             text-align: center;
             display: none;
             z-index: 1000;
+            width: 80%;
         }
 
         .confetti {
             position: fixed;
-            width: 10px;
-            height: 10px;
+            width: 8px;
+            height: 8px;
             z-index: 999;
         }
     </style>
@@ -156,29 +160,31 @@
 <body>
 
 <div class="game-container">
-    <div class="mt-8 text-center px-4">
-        <h1 class="text-3xl font-bold text-green-800 mb-1">🍎 護聲小博士</h1>
-        <p class="text-lg text-blue-700">點擊蘋果看習慣，然後拖到正確籃子裏！</p>
-    </div>
+    <header class="text-center px-4">
+        <h1 class="text-2xl font-bold text-green-800">🍎 護聲小博士</h1>
+        <p class="text-sm text-blue-700">點擊蘋果看習慣，然後拖到籃子！</p>
+    </header>
 
     <div id="tree">
         <!-- Apples will be generated here -->
     </div>
 
-    <div id="good-basket" class="basket">
-        <span class="text-xl">好習慣</span>
-        <div class="text-xs">放入這裡</div>
-    </div>
+    <div class="basket-container">
+        <div id="good-basket" class="basket">
+            <span class="text-lg">好習慣</span>
+            <div class="text-[10px]">放入這裡</div>
+        </div>
 
-    <div id="bad-basket" class="basket">
-        <span class="text-xl">壞習慣</span>
-        <div class="text-xs">放入這裡</div>
+        <div id="bad-basket" class="basket">
+            <span class="text-lg">壞習慣</span>
+            <div class="text-[10px]">放入這裡</div>
+        </div>
     </div>
 
     <div id="success-modal" class="success-msg">
-        <h2 class="text-4xl mb-4 text-green-600">🌟 太棒了！</h2>
-        <p class="text-xl mb-6">你學會了如何保護聲線！</p>
-        <button onclick="location.reload()" class="bg-blue-500 text-white px-8 py-3 rounded-full font-bold text-xl hover:bg-blue-600 transition shadow-lg">再玩一次</button>
+        <h2 class="text-3xl mb-4 text-green-600">🌟 太棒了！</h2>
+        <p class="text-lg mb-6">你學會了如何保護聲音！</p>
+        <button onclick="location.reload()" class="bg-blue-500 text-white px-8 py-3 rounded-full font-bold text-lg hover:bg-blue-600 shadow-lg">再玩一次</button>
     </div>
 </div>
 
@@ -195,8 +201,8 @@
         { text: "不停説話", good: false },
         { text: "大哭", good: false },
         { text: "用口呼吸", good: false },
-        { text: "經常吃煎炸食物", good: false },
-        { text: "經常吃辛辣食物", good: false }
+        { text: "吃煎炸食物", good: false },
+        { text: "吃辛辣食物", good: false }
     ];
 
     const tree = document.getElementById('tree');
@@ -220,11 +226,11 @@
     }
 
     function initApples() {
-        const treeWidth = 360;
-        const treeHeight = 380;
+        const rect = tree.getBoundingClientRect();
+        const treeWidth = rect.width;
+        const treeHeight = rect.height;
         const shuffledHabits = [...habits].sort(() => Math.random() - 0.5);
 
-        // Grid Configuration (3 columns by 4-5 rows to fit 13 items)
         const cols = 3;
         const colWidth = treeWidth / (cols + 1);
         const rowHeight = treeHeight / 5.5; 
@@ -234,16 +240,22 @@
             apple.className = 'apple';
             apple.dataset.good = habit.good;
             
-            // Calculate grid position
             const col = index % cols;
             const row = Math.floor(index / cols);
+            const isLastApple = index === shuffledHabits.length - 1;
             
-            // Base coordinates
-            let x = (col + 1) * colWidth - 35; 
-            let y = (row + 1) * rowHeight - 35;
+            let x, y;
+            
+            if (isLastApple) {
+                // Center horizontally for the very last apple
+                x = (treeWidth / 2) - 30;
+                y = (row + 1) * rowHeight - 30;
+            } else {
+                x = (col + 1) * colWidth - 30; 
+                y = (row + 1) * rowHeight - 30;
+            }
 
-            // Add slight "wiggle" to make it look less robotic
-            const wiggle = 12;
+            const wiggle = 6;
             x += (Math.random() - 0.5) * wiggle;
             y += (Math.random() - 0.5) * wiggle;
             
@@ -293,6 +305,8 @@
             el.style.position = 'fixed';
             el.style.left = `${initialLeft}px`;
             el.style.top = `${initialTop}px`;
+            el.style.width = '60px'; 
+            el.style.height = '60px';
             document.body.appendChild(el);
         };
 
@@ -381,7 +395,7 @@
     }
 
     function createConfetti() {
-        for (let i = 0; i < 60; i++) {
+        for (let i = 0; i < 40; i++) {
             const confetti = document.createElement('div');
             confetti.className = 'confetti';
             confetti.style.left = Math.random() * 100 + 'vw';
@@ -391,15 +405,15 @@
 
             confetti.animate([
                 { transform: `translate3d(0,0,0) rotate(0)`, opacity: 1 },
-                { transform: `translate3d(${(Math.random() - 0.5) * 250}px, 100vh, 0) rotate(${Math.random() * 1000}deg)`, opacity: 0 }
+                { transform: `translate3d(${(Math.random() - 0.5) * 200}px, 100vh, 0) rotate(${Math.random() * 1000}deg)`, opacity: 0 }
             ], {
-                duration: 2500 + Math.random() * 2000,
+                duration: 2000 + Math.random() * 1500,
                 easing: 'ease-out'
             }).onfinish = () => confetti.remove();
         }
     }
 
-    window.onload = initApples;
+    window.addEventListener('load', initApples);
 </script>
 
 </body>
