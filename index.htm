@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>護聲小蘋果 - 採摘遊戲</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            touch-action: none;
+            overflow: hidden;
+            font-family: 'PingFang HK', 'Microsoft JhengHei', sans-serif;
+            background: linear-gradient(to bottom, #87CEEB 0%, #E0F7FA 100%);
+        }
+
+        .game-container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        #tree {
+            position: relative;
+            width: 360px;
+            height: 380px;
+            background: #2D5A27;
+            border-radius: 50% 50% 45% 45%;
+            margin-top: 30px;
+            box-shadow: inset -20px -20px 50px rgba(0,0,0,0.2);
+            z-index: 1;
+        }
+
+        #tree::after {
+            content: '';
+            position: absolute;
+            bottom: -60px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 80px;
+            background: #5D4037;
+            z-index: -1;
+        }
+
+        .apple {
+            position: absolute;
+            width: 70px;
+            height: 70px;
+            cursor: grab;
+            user-select: none;
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1));
+            transition: transform 0.2s ease;
+        }
+
+        .apple-body {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: #FF4444;
+            border-radius: 50% 50% 45% 45%;
+            box-shadow: inset -5px -5px 10px rgba(0,0,0,0.2);
+        }
+
+        .apple-leaf {
+            position: absolute;
+            top: -5px;
+            left: 50%;
+            width: 15px;
+            height: 20px;
+            background: #4CAF50;
+            border-radius: 0 100% 0 100%;
+            transform: translateX(-50%) rotate(-15deg);
+        }
+
+        .apple-text {
+            position: relative;
+            z-index: 11;
+            color: white;
+            font-weight: bold;
+            font-size: 13px;
+            text-align: center;
+            padding: 5px;
+            line-height: 1.2;
+            pointer-events: none;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .apple.revealed .apple-text {
+            opacity: 1;
+        }
+
+        .basket {
+            width: 145px;
+            height: 110px;
+            border-radius: 10px 10px 45% 45%;
+            position: absolute;
+            bottom: 30px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-end;
+            padding-bottom: 15px;
+            color: white;
+            font-weight: 800;
+            box-shadow: 0 8px 15px rgba(0,0,0,0.2);
+            border: 4px solid rgba(255,255,255,0.3);
+        }
+
+        #good-basket {
+            left: 15px;
+            background: #43A047;
+        }
+
+        #bad-basket {
+            right: 15px;
+            background: #E53935;
+        }
+
+        .dragging {
+            z-index: 100;
+            cursor: grabbing;
+            transform: scale(1.3);
+        }
+
+        .success-msg {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 30px 50px;
+            border-radius: 30px;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+            text-align: center;
+            display: none;
+            z-index: 1000;
+        }
+
+        .confetti {
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            z-index: 999;
+        }
+    </style>
+</head>
+<body>
+
+<div class="game-container">
+    <div class="mt-8 text-center px-4">
+        <h1 class="text-3xl font-bold text-green-800 mb-1">🍎 護聲小博士</h1>
+        <p class="text-lg text-blue-700">點擊蘋果看習慣，然後拖到正確籃子裏！</p>
+    </div>
+
+    <div id="tree">
+        <!-- Apples will be generated here -->
+    </div>
+
+    <div id="good-basket" class="basket">
+        <span class="text-xl">好習慣</span>
+        <div class="text-xs">放入這裡</div>
+    </div>
+
+    <div id="bad-basket" class="basket">
+        <span class="text-xl">壞習慣</span>
+        <div class="text-xs">放入這裡</div>
+    </div>
+
+    <div id="success-modal" class="success-msg">
+        <h2 class="text-4xl mb-4 text-green-600">🌟 太棒了！</h2>
+        <p class="text-xl mb-6">你學會了如何保護聲線！</p>
+        <button onclick="location.reload()" class="bg-blue-500 text-white px-8 py-3 rounded-full font-bold text-xl hover:bg-blue-600 transition shadow-lg">再玩一次</button>
+    </div>
+</div>
+
+<script>
+    const habits = [
+        { text: "慢慢説話", good: true },
+        { text: "多喝水", good: true },
+        { text: "輕聲説話", good: true },
+        { text: "睡覺休息", good: true },
+        { text: "用鼻子呼吸", good: true },
+        { text: "尖叫", good: false },
+        { text: "大叫", good: false },
+        { text: "不喝水", good: false },
+        { text: "不停説話", good: false },
+        { text: "大哭", good: false },
+        { text: "用口呼吸", good: false },
+        { text: "經常吃煎炸食物", good: false },
+        { text: "經常吃辛辣食物", good: false }
+    ];
+
+    const tree = document.getElementById('tree');
+    const goodBasket = document.getElementById('good-basket');
+    const badBasket = document.getElementById('bad-basket');
+    let applesRemaining = habits.length;
+
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    function playCorrectSound() {
+        const oscillator = audioCtx.createOscillator();
+        const gainNode = audioCtx.createGain();
+        oscillator.connect(gainNode);
+        gainNode.connect(audioCtx.destination);
+        oscillator.type = 'sine';
+        oscillator.frequency.setValueAtTime(523.25, audioCtx.currentTime);
+        oscillator.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.1);
+        gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+        oscillator.start();
+        oscillator.stop(audioCtx.currentTime + 0.3);
+    }
+
+    function initApples() {
+        const treeWidth = 360;
+        const treeHeight = 380;
+        const shuffledHabits = [...habits].sort(() => Math.random() - 0.5);
+
+        // Grid Configuration (3 columns by 4-5 rows to fit 13 items)
+        const cols = 3;
+        const colWidth = treeWidth / (cols + 1);
+        const rowHeight = treeHeight / 5.5; 
+
+        shuffledHabits.forEach((habit, index) => {
+            const apple = document.createElement('div');
+            apple.className = 'apple';
+            apple.dataset.good = habit.good;
+            
+            // Calculate grid position
+            const col = index % cols;
+            const row = Math.floor(index / cols);
+            
+            // Base coordinates
+            let x = (col + 1) * colWidth - 35; 
+            let y = (row + 1) * rowHeight - 35;
+
+            // Add slight "wiggle" to make it look less robotic
+            const wiggle = 12;
+            x += (Math.random() - 0.5) * wiggle;
+            y += (Math.random() - 0.5) * wiggle;
+            
+            apple.style.left = `${x}px`;
+            apple.style.top = `${y}px`;
+            apple.dataset.origX = x;
+            apple.dataset.origY = y;
+            
+            apple.innerHTML = `
+                <div class="apple-body"></div>
+                <div class="apple-leaf"></div>
+                <div class="apple-text">${habit.text}</div>
+            `;
+            
+            setupDraggable(apple);
+            tree.appendChild(apple);
+        });
+    }
+
+    function setupDraggable(el) {
+        let startX, startY, initialLeft, initialTop;
+        let isDragging = false;
+        let revealTimeout = null;
+
+        const onStart = (e) => {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            
+            el.classList.add('revealed');
+            if (revealTimeout) clearTimeout(revealTimeout);
+            
+            revealTimeout = setTimeout(() => {
+                el.classList.remove('revealed');
+            }, 1000);
+
+            isDragging = true;
+            el.classList.add('dragging');
+
+            const clientX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
+            const clientY = e.type.includes('touch') ? e.touches[0].clientY : e.clientY;
+            
+            const rect = el.getBoundingClientRect();
+            startX = clientX;
+            startY = clientY;
+            initialLeft = rect.left;
+            initialTop = rect.top;
+
+            el.style.position = 'fixed';
+            el.style.left = `${initialLeft}px`;
+            el.style.top = `${initialTop}px`;
+            document.body.appendChild(el);
+        };
+
+        const onMove = (e) => {
+            if (!isDragging) return;
+            e.preventDefault();
+            const clientX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
+            const clientY = e.type.includes('touch') ? e.touches[0].clientY : e.clientY;
+            
+            const dx = clientX - startX;
+            const dy = clientY - startY;
+            
+            el.style.left = `${initialLeft + dx}px`;
+            el.style.top = `${initialTop + dy}px`;
+        };
+
+        const onEnd = (e) => {
+            if (!isDragging) return;
+            isDragging = false;
+            el.classList.remove('dragging');
+            
+            const rect = el.getBoundingClientRect();
+            const appleCenterX = rect.left + rect.width / 2;
+            const appleCenterY = rect.top + rect.height / 2;
+            
+            const goodRect = goodBasket.getBoundingClientRect();
+            const badRect = badBasket.getBoundingClientRect();
+            const isGood = el.dataset.good === "true";
+
+            if (isPointInRect(appleCenterX, appleCenterY, goodRect)) {
+                if (isGood) handleSuccess(el);
+                else returnToOriginalPos(el);
+            } 
+            else if (isPointInRect(appleCenterX, appleCenterY, badRect)) {
+                if (!isGood) handleSuccess(el);
+                else returnToOriginalPos(el);
+            }
+        };
+
+        el.addEventListener('mousedown', onStart);
+        el.addEventListener('touchstart', onStart, { passive: false });
+        window.addEventListener('mousemove', onMove);
+        window.addEventListener('touchmove', onMove, { passive: false });
+        window.addEventListener('mouseup', onEnd);
+        window.addEventListener('touchend', onEnd);
+    }
+
+    function handleSuccess(el) {
+        playCorrectSound();
+        el.style.transition = "transform 0.4s ease-in, opacity 0.4s";
+        el.style.transform = "scale(0) rotate(20deg)";
+        el.style.opacity = "0";
+        setTimeout(() => {
+            el.remove();
+            applesRemaining--;
+            if (applesRemaining === 0) showSuccess();
+        }, 400);
+    }
+
+    function returnToOriginalPos(el) {
+        el.style.transition = "all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1)";
+        const treeRect = tree.getBoundingClientRect();
+        const targetX = treeRect.left + parseFloat(el.dataset.origX);
+        const targetY = treeRect.top + parseFloat(el.dataset.origY);
+        
+        el.style.left = `${targetX}px`;
+        el.style.top = `${targetY}px`;
+        
+        setTimeout(() => {
+            el.style.transition = "";
+            el.classList.remove('revealed');
+            el.style.position = 'absolute';
+            el.style.left = `${el.dataset.origX}px`;
+            el.style.top = `${el.dataset.origY}px`;
+            tree.appendChild(el);
+        }, 600);
+    }
+
+    function isPointInRect(x, y, rect) {
+        return x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom;
+    }
+
+    function showSuccess() {
+        document.getElementById('success-modal').style.display = 'block';
+        createConfetti();
+    }
+
+    function createConfetti() {
+        for (let i = 0; i < 60; i++) {
+            const confetti = document.createElement('div');
+            confetti.className = 'confetti';
+            confetti.style.left = Math.random() * 100 + 'vw';
+            confetti.style.top = '-10px';
+            confetti.style.backgroundColor = `hsl(${Math.random() * 360}, 75%, 60%)`;
+            document.body.appendChild(confetti);
+
+            confetti.animate([
+                { transform: `translate3d(0,0,0) rotate(0)`, opacity: 1 },
+                { transform: `translate3d(${(Math.random() - 0.5) * 250}px, 100vh, 0) rotate(${Math.random() * 1000}deg)`, opacity: 0 }
+            ], {
+                duration: 2500 + Math.random() * 2000,
+                easing: 'ease-out'
+            }).onfinish = () => confetti.remove();
+        }
+    }
+
+    window.onload = initApples;
+</script>
+
+</body>
+</html>
