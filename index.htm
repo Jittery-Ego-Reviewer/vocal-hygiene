@@ -11,54 +11,74 @@
             overflow: hidden;
             font-family: 'PingFang HK', 'Microsoft JhengHei', sans-serif;
             background: linear-gradient(to bottom, #87CEEB 0%, #E0F7FA 100%);
+            height: 100vh;
+            width: 100vw;
+            margin: 0;
         }
 
         .game-container {
             position: relative;
-            width: 100vw;
-            height: 100vh;
+            width: 100%;
+            height: 100%;
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: space-between; /* Distribute content vertically */
-            padding: 20px 0;
+            /* Ensure the content fits without pushing anything out */
+            justify-content: space-between; 
+            padding: 10px 0;
+            box-sizing: border-box;
+        }
+
+        header {
+            flex-shrink: 0;
+            padding-bottom: 5px;
+        }
+
+        #tree-area {
+            flex-grow: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            position: relative;
+            min-height: 0; /* Important for flex child to shrink */
         }
 
         #tree {
             position: relative;
-            width: 85vw; /* Responsive width */
-            max-width: 360px;
-            aspect-ratio: 1 / 1; /* Keep it circular */
+            /* Use smaller responsive size to guarantee space for baskets */
+            width: 70vw; 
+            max-width: 300px;
+            aspect-ratio: 1 / 1;
             background: #2D5A27;
             border-radius: 50% 50% 45% 45%;
-            box-shadow: inset -15px -15px 40px rgba(0,0,0,0.2);
+            box-shadow: inset -10px -10px 30px rgba(0,0,0,0.2);
             z-index: 1;
-            margin: auto 0; /* Center tree in available space */
         }
 
         #tree::after {
             content: '';
             position: absolute;
-            bottom: -40px;
+            bottom: -30px;
             left: 50%;
             transform: translateX(-50%);
-            width: 40px;
-            height: 50px;
+            width: 35px;
+            height: 40px;
             background: #5D4037;
             z-index: -1;
         }
 
         .apple {
             position: absolute;
-            width: 60px;
-            height: 60px;
+            width: 54px;
+            height: 54px;
             cursor: grab;
             user-select: none;
             z-index: 10;
             display: flex;
             align-items: center;
             justify-content: center;
-            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1));
+            filter: drop-shadow(0 3px 5px rgba(0,0,0,0.1));
             transition: transform 0.2s ease;
         }
 
@@ -68,15 +88,15 @@
             height: 100%;
             background: #FF4444;
             border-radius: 50% 50% 45% 45%;
-            box-shadow: inset -4px -4px 8px rgba(0,0,0,0.2);
+            box-shadow: inset -3px -3px 6px rgba(0,0,0,0.2);
         }
 
         .apple-leaf {
             position: absolute;
-            top: -4px;
+            top: -3px;
             left: 50%;
-            width: 12px;
-            height: 16px;
+            width: 10px;
+            height: 14px;
             background: #4CAF50;
             border-radius: 0 100% 0 100%;
             transform: translateX(-50%) rotate(-15deg);
@@ -87,9 +107,9 @@
             z-index: 11;
             color: white;
             font-weight: bold;
-            font-size: 11px;
+            font-size: 10px;
             text-align: center;
-            padding: 4px;
+            padding: 3px;
             line-height: 1.1;
             pointer-events: none;
             text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
@@ -105,24 +125,25 @@
             width: 100%;
             display: flex;
             justify-content: space-around;
-            padding: 0 10px 10px 10px;
+            padding: 10px 5px;
+            flex-shrink: 0; /* Prevent baskets from shrinking/disappearing */
             z-index: 5;
+            background: rgba(255,255,255,0.1); /* Subtle floor area */
         }
 
         .basket {
-            width: 42vw;
-            max-width: 150px;
-            height: 90px;
-            border-radius: 10px 10px 45% 45%;
+            width: 45vw;
+            max-width: 140px;
+            height: 75px; /* Shorter baskets */
+            border-radius: 8px 8px 40% 40%;
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: flex-end;
-            padding-bottom: 12px;
+            justify-content: center;
             color: white;
             font-weight: 800;
-            box-shadow: 0 8px 15px rgba(0,0,0,0.2);
-            border: 3px solid rgba(255,255,255,0.3);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            border: 2px solid rgba(255,255,255,0.3);
         }
 
         #good-basket { background: #43A047; }
@@ -140,13 +161,13 @@
             left: 50%;
             transform: translate(-50%, -50%);
             background: white;
-            padding: 30px;
-            border-radius: 30px;
+            padding: 25px;
+            border-radius: 20px;
             box-shadow: 0 15px 40px rgba(0,0,0,0.3);
             text-align: center;
             display: none;
             z-index: 1000;
-            width: 80%;
+            width: 85%;
         }
 
         .confetti {
@@ -160,31 +181,31 @@
 <body>
 
 <div class="game-container">
-    <header class="text-center px-4">
-        <h1 class="text-2xl font-bold text-green-800">🍎 護聲小博士</h1>
-        <p class="text-sm text-blue-700">點擊蘋果看習慣，然後拖到籃子！</p>
+    <header class="text-center">
+        <h1 class="text-xl font-bold text-green-800">🍎 護聲小博士</h1>
+        <p class="text-[12px] text-blue-700">點擊蘋果看習慣，然後拖到籃子！</p>
     </header>
 
-    <div id="tree">
-        <!-- Apples will be generated here -->
+    <div id="tree-area">
+        <div id="tree">
+            <!-- Apples will be generated here -->
+        </div>
     </div>
 
     <div class="basket-container">
         <div id="good-basket" class="basket">
-            <span class="text-lg">好習慣</span>
-            <div class="text-[10px]">放入這裡</div>
+            <span class="text-base">好習慣</span>
         </div>
 
         <div id="bad-basket" class="basket">
-            <span class="text-lg">壞習慣</span>
-            <div class="text-[10px]">放入這裡</div>
+            <span class="text-base">壞習慣</span>
         </div>
     </div>
 
     <div id="success-modal" class="success-msg">
-        <h2 class="text-3xl mb-4 text-green-600">🌟 太棒了！</h2>
-        <p class="text-lg mb-6">你學會了如何保護聲音！</p>
-        <button onclick="location.reload()" class="bg-blue-500 text-white px-8 py-3 rounded-full font-bold text-lg hover:bg-blue-600 shadow-lg">再玩一次</button>
+        <h2 class="text-2xl font-bold mb-3 text-green-600">🌟 太棒了！</h2>
+        <p class="text-base mb-5">你學會了如何保護聲音！</p>
+        <button onclick="location.reload()" class="bg-blue-500 text-white px-6 py-2 rounded-full font-bold text-lg hover:bg-blue-600 shadow-lg">再玩一次</button>
     </div>
 </div>
 
@@ -212,6 +233,7 @@
 
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     function playCorrectSound() {
+        if (audioCtx.state === 'suspended') audioCtx.resume();
         const oscillator = audioCtx.createOscillator();
         const gainNode = audioCtx.createGain();
         oscillator.connect(gainNode);
@@ -245,17 +267,15 @@
             const isLastApple = index === shuffledHabits.length - 1;
             
             let x, y;
-            
             if (isLastApple) {
-                // Center horizontally for the very last apple
-                x = (treeWidth / 2) - 30;
-                y = (row + 1) * rowHeight - 30;
+                x = (treeWidth / 2) - 27;
+                y = (row + 1) * rowHeight - 27;
             } else {
-                x = (col + 1) * colWidth - 30; 
-                y = (row + 1) * rowHeight - 30;
+                x = (col + 1) * colWidth - 27; 
+                y = (row + 1) * rowHeight - 27;
             }
 
-            const wiggle = 6;
+            const wiggle = 4;
             x += (Math.random() - 0.5) * wiggle;
             y += (Math.random() - 0.5) * wiggle;
             
@@ -305,14 +325,14 @@
             el.style.position = 'fixed';
             el.style.left = `${initialLeft}px`;
             el.style.top = `${initialTop}px`;
-            el.style.width = '60px'; 
-            el.style.height = '60px';
+            el.style.width = '54px'; 
+            el.style.height = '54px';
             document.body.appendChild(el);
         };
 
         const onMove = (e) => {
             if (!isDragging) return;
-            e.preventDefault();
+            if (e.cancelable) e.preventDefault();
             const clientX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
             const clientY = e.type.includes('touch') ? e.touches[0].clientY : e.clientY;
             
@@ -343,6 +363,8 @@
             else if (isPointInRect(appleCenterX, appleCenterY, badRect)) {
                 if (!isGood) handleSuccess(el);
                 else returnToOriginalPos(el);
+            } else {
+                returnToOriginalPos(el);
             }
         };
 
@@ -367,7 +389,7 @@
     }
 
     function returnToOriginalPos(el) {
-        el.style.transition = "all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1)";
+        el.style.transition = "all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)";
         const treeRect = tree.getBoundingClientRect();
         const targetX = treeRect.left + parseFloat(el.dataset.origX);
         const targetY = treeRect.top + parseFloat(el.dataset.origY);
@@ -382,7 +404,7 @@
             el.style.left = `${el.dataset.origX}px`;
             el.style.top = `${el.dataset.origY}px`;
             tree.appendChild(el);
-        }, 600);
+        }, 500);
     }
 
     function isPointInRect(x, y, rect) {
